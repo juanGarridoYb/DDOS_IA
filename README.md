@@ -1,51 +1,122 @@
-# Firewall AI
+# 🛡️ Firewall-AI
 
-This work consists of building a system that acts as a firewall for detecting denial-of-service attacks. To perform these detections, Machine Learning and Deep Learning techniques have been employed to train models with these capabilities. In addition, a graphical interface has been implemented through which the traffic received by the system can be observed in real-time, as well as the predictions it makes about whether or not the traffic is an attack.
+Este proyecto implementa un **sistema de detección de ataques de denegación de servicio (DoS/DDoS)** basado en **Inteligencia Artificial**.  
+El sistema captura tráfico de red, lo procesa y clasifica en tiempo real mediante modelos de **Machine Learning / Deep Learning**, principalmente **XGBoost**, entrenado con datasets de flujos de red.
 
-Firstly, to train an artificial intelligence model, training data is required. A dataset has been chosen that contains different characteristics about a large number of network flows and a label indicating whether it is an attack, and if so, what type of attack it is. After choosing the dataset, a preprocessing stage is necessary, which consists of preparing the data so that the training phase is good. Once the data is ready, two models have been trained. The first is a neural network, specifically, a multilayer perceptron, and the second is a gradient boosting algorithm based on decision trees. After training, evaluating, and comparing them, it has been found that the gradient boosting model outperforms the neural network, achieving 99\% accuracy on the validation dataset, so this model has been used when launching the system.
+---
 
-On the other hand, it has been necessary to implement a tool to capture network traffic, which is also capable of obtaining the same characteristics about network flows that are used for model training. To do this, an existing tool developed by the same university that created the dataset used has been used as a base. However, this tool does not meet all the requirements necessary to be included in this work, so a version of it that does meet the requirements has been implemented.
+## 📂 Estructura del proyecto
 
-Finally, a graphical interface has been implemented that allows traffic to be visualized and all of this has been integrated under the same system. After conducting several experiments, quite promising results have been obtained, as the system has been able to detect denial-of-service attacks.
+Firewall-AI/
+├── backend/ # API en Flask (detección y predicciones)
+│ ├── app.py
+│ └── model/firewall_xgb.pkl
+│
+├── frontend/ # Interfaz en Vue.js
+│ ├── src/views
+│ ├── src/components
+│ └── src/router
+│
+├── data/dataset/ # Datasets CSV para pruebas
+│ ├── DrDoS_DNS.csv
+│ └── UDPLag.csv
+│
+├── simulate_traffic.py # Simulador de tráfico (desde CSV o PCAP)
+├── test_prediction.py # Script de pruebas rápidas
+└── venv310/ # Entorno virtual de Python 3.10
 
-***
+yaml
+Copiar
+Editar
 
-# Installation
+---
 
-This system has been developed Debian, but similar distributions should work as well. 
+## ⚙️ Instalación
 
-First, you have to install the dependencies and clone this repository:
-
+### 1. Clonar repositorio
 ```bash
-sudo apt install libpcap0.8
-sudo apt install tcpdump
-git clone https://github.com/DavidRamosArchilla/Firewall-AI.git
+git clone https://github.com/TU_USUARIO/Firewall-AI.git
 cd Firewall-AI
-```
+2. Crear entorno virtual
+En Windows (PowerShell):
 
-Then, it is advisable to create a Python virtual environment
+bash
+Copiar
+Editar
+py -3.10 -m venv venv310
+.\venv310\Scripts\activate
+3. Instalar dependencias
+bash
+Copiar
+Editar
+pip install --upgrade pip
+pip install -r requirements.txt
+⚠️ Si alguna librería falla en Windows (ej. pyflowmeter), usar la versión adaptada:
+pip install git+https://github.com/DavidRamosArchilla/pyflowmeter.git
 
-```bash
-python -m venv venv
-source venv/bin/activate
-```
-and install the libraries
-```bash
-pip install -q --upgrade pip
-pip install -q pyflowmeter
-pip install -q -r Firewall-AI/requirements.txt
-```
+🚀 Ejecución
+1. Iniciar backend (Flask)
+bash
+Copiar
+Editar
+cd backend
+python app.py
+Servidor activo en: http://localhost:5000
 
-Lastly, run the command to start the server:
+2. Probar predicciones rápidas
+bash
+Copiar
+Editar
+python test_prediction.py
+Ejemplo de salida:
 
-```
-sudo venv/bin/python app.py
-```
+json
+Copiar
+Editar
+{
+  "predictions": [
+    {"flow_id": 0, "type": "Normal", "confidence": 0.95},
+    {"flow_id": 1, "type": "DDoS Attack", "confidence": 0.99}
+  ]
+}
+3. Simular tráfico desde PCAP/CSV
+bash
+Copiar
+Editar
+python simulate_traffic.py
+Envía tráfico en intervalos al endpoint /api/traffic.
 
-## Demo
+4. Iniciar frontend (Vue.js)
+bash
+Copiar
+Editar
+cd frontend/firewall-frontend
+npm install
+npm run serve
+Disponible en: http://localhost:8080
 
-There is a Google Colab notebook available with a demo of this project.
+📊 Dataset
+El sistema se entrenó y probó con datasets de ataques DDoS de la University of New Brunswick (CIC-DDoS2019).
+Los CSV procesados deben colocarse en la carpeta:
 
-<a href="https://colab.research.google.com/github/DavidRamosArchilla/Firewall-AI/blob/main/notebooks/server_firewall_ai.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+bash
+Copiar
+Editar
+data/dataset/
+🧠 Modelo de IA
+Algoritmo principal: XGBoost (Gradient Boosting)
 
-Note: to obtain a free Ngrok token you need to access https://dashboard.ngrok.com/get-started/your-authtoken
+Precisión obtenida en validación: 99%
+
+El modelo entrenado se encuentra en:
+
+bash
+Copiar
+Editar
+backend/model/firewall_xgb.pkl
+🖼️ Resultados esperados
+Backend prediciendo ataques en tiempo real.
+
+Frontend mostrando tráfico con etiquetas Normal / Ataque.
+
+Simulador reproduciendo flujos desde datasets o PCAP.
